@@ -38,7 +38,7 @@ public class TTT : MonoBehaviour
 
     public void MakeOptimalMove()
     {
-        bool canWin = false;
+        bool canWin = false; //Apparently I had an idea about using this as the name sounds, checking if the player can win and making a move based on that, but I ended up using it to be able to collapse segments of code....
         int sum;
 
         //Win Check Code
@@ -171,7 +171,6 @@ public class TTT : MonoBehaviour
             }
             Debug.Log("---------------------No Wins Found---------------------");
         }
-        
         //Block Checker
         if (canWin == false)
         {
@@ -226,7 +225,7 @@ public class TTT : MonoBehaviour
                     sum += value;
                 }
 
-                //Win if possible
+                //Block if possible
                 Debug.Log("SUM: " + sum);
                 if (sum == 2)
                 {
@@ -298,6 +297,74 @@ public class TTT : MonoBehaviour
             }
             Debug.Log("---------------------No Block Moves Found---------------------");
         }
+        //Take Corner if board is empty
+        if (canWin == false)
+        {
+            sum = 0;
+            for (int i = 0; i < Rows; i++)
+            {
+                for(int k = 0; k < Columns; k++)
+                {
+                    if(cells[k,i].current == PlayerOption.NONE)
+                    {
+                        sum++;
+                    }
+                }
+            }
+            if(sum == 9)
+            {
+                ChooseSpace(0, 0);
+                return;
+            }
+        }
+        //Take Center if Opponent has a corner
+        if(canWin == false)
+        {
+            bool hasCorner = false;
+            if(cells[Columns/2,Rows/2].current == PlayerOption.NONE)
+            {
+                if (hasCorner == false && cells[0, 0].current          != currentPlayer && cells[0, 0].current          != PlayerOption.NONE) { hasCorner = true; }
+                if (hasCorner == false && cells[0, Rows].current       != currentPlayer && cells[0, Rows].current       != PlayerOption.NONE) { hasCorner = true; }
+                if (hasCorner == false && cells[Columns, 0].current    != currentPlayer && cells[Columns, 0].current    != PlayerOption.NONE) { hasCorner = true; }
+                if (hasCorner == false && cells[Columns, Rows].current != currentPlayer && cells[Columns, Rows].current != PlayerOption.NONE) { hasCorner = true; }
+                if(hasCorner == true){ ChooseSpace(Columns / 2, Rows / 2); return; }
+            }
+        }
+        //Take cell adjacent to a controlled corner, I believe this is unnecessary to add as the random placement already handles this somewhat.
+        if(canWin == false)
+        {
+            
+        }
+        //Random Placement Failsafe
+        if (canWin == false)
+        {
+            bool placed = false;
+            int count = 0;
+            while (!placed)
+            {
+                count ++;
+                Debug.Log("Generating Random Spot...");
+                int row = Random.Range(0, Rows);
+                int column = Random.Range(0, Columns);
+                if (cells[column, row].current == PlayerOption.NONE)
+                {
+                    placed = true;
+                    ChooseSpace(column, row);
+                    Debug.Log("Placing At Generated Spot...");
+                }
+                else
+                {
+                    Debug.Log("Spot Already Taken...");
+                }
+                if(count >= 100)
+                {
+                    placed = true;
+                    Debug.Log("----Failesafe That Escapes the Failsafe----");
+                }
+            }
+            return;
+        }
+        
     }
 
     public void ChooseSpace(int column, int row)
